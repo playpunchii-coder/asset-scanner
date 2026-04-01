@@ -25,7 +25,23 @@
         const webAppUrl = "ใส่_URL_ของ_GOOGLE_APPS_SCRIPT_ตรงนี้"; // 🚩 เปลี่ยนตรงนี้!
         const html5QrCode = new Html5Qrcode("reader");
 
-        const config = { fps: 20, qrbox: { width: 250, height: 250 } };
+// 🚩 แก้ไขบรรทัดที่ตั้งค่า formats เพื่อรองรับ Barcode ทุกชนิด
+const config = { 
+    fps: 20, 
+    qrbox: { width: 280, height: 150 }, // ปรับทรงกล่องให้ยาวขึ้นเหมาะกับ Barcode
+    aspectRatio: 1.0,
+    // เพิ่มบรรทัดนี้เพื่อบอกว่า "เอาทุก Format"
+    formatsToSupport: [ 
+        Html5QrcodeSupportedFormats.QR_CODE,
+        Html5QrcodeSupportedFormats.UPC_A,
+        Html5QrcodeSupportedFormats.UPC_E,
+        Html5QrcodeSupportedFormats.EAN_13,
+        Html5QrcodeSupportedFormats.EAN_8,
+        Html5QrcodeSupportedFormats.CODE_39,
+        Html5QrcodeSupportedFormats.CODE_128,
+        Html5QrcodeSupportedFormats.ITF
+    ]
+};
 
         html5QrCode.start({ facingMode: "environment" }, config, (decodedText) => {
             document.getElementById('result').innerText = "Sending...";
