@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scanner Pro v3.0</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#0f172a] text-white p-5 min-h-screen">
+    <div class="max-w-md mx-auto space-y-6">
+        <h1 class="text-3xl font-black text-center text-emerald-400 mt-8">SCANNER PRO</h1>
+        
+        <input type="text" id="inspector" placeholder="ชื่อผู้ตรวจสอบ..." 
+               class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-4 text-white">
+
+        <div id="reader" class="rounded-3xl overflow-hidden border-2 border-slate-700 shadow-2xl"></div>
+
+        <div id="result" class="p-6 bg-slate-800 rounded-2xl text-center text-xl font-mono text-emerald-400 min-h-[80px] border border-slate-700">
+            ---
+        </div>
+    </div>
+
+    <script>
+        const webAppUrl = "ใส่_URL_ของ_GOOGLE_APPS_SCRIPT_ตรงนี้"; // 🚩 เปลี่ยนตรงนี้!
+        const html5QrCode = new Html5Qrcode("reader");
+
+        const config = { fps: 20, qrbox: { width: 250, height: 250 } };
+
+        html5QrCode.start({ facingMode: "environment" }, config, (decodedText) => {
+            document.getElementById('result').innerText = "Sending...";
+            
+            // ส่งข้อมูลไป Google Sheets
+            fetch(webAppUrl, {
+                method: 'POST',
+                mode: 'no-cors', // ข้าม CORS Policy
+                body: JSON.stringify({
+                    inspector: document.getElementById('inspector').value || "N/A",
+                    qrData: decodedText
+                })
+            }).then(() => {
+                document.getElementById('result').innerText = decodedText;
+                alert("สแกนสำเร็จ: " + decodedText);
+            }).catch(err => alert("Error: " + err));
+        });
+    </script>
+</body>
+</html>
