@@ -1,63 +1,95 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scanner Pro v3.0</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Scanner Pro v3.2 - Max Sensitivity</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        #reader { border: none !important; border-radius: 2rem; overflow: hidden; background: #000; shadow: 0 25px 50px -12px rgb(0 0 0 / 0.5); }
+        /* ปรับแต่งเส้น Scan Line ให้ดูเป็นมืออาชีพ */
+        #reader__scan_region video { object-fit: cover !important; }
+    </style>
 </head>
-<body class="bg-[#0f172a] text-white p-5 min-h-screen">
+<body class="bg-[#0f172a] text-white p-5 min-h-screen font-sans">
     <div class="max-w-md mx-auto space-y-6">
-        <h1 class="text-3xl font-black text-center text-emerald-400 mt-8">SCANNER PRO</h1>
-        
-        <input type="text" id="inspector" placeholder="ชื่อผู้ตรวจสอบ..." 
-               class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-4 text-white">
-
-        <div id="reader" class="rounded-3xl overflow-hidden border-2 border-slate-700 shadow-2xl"></div>
-
-        <div id="result" class="p-6 bg-slate-800 rounded-2xl text-center text-xl font-mono text-emerald-400 min-h-[80px] border border-slate-700">
-            ---
+        <div class="text-center pt-8 space-y-2">
+            <h1 class="text-3xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
+                SCANNER PRO v3.2
+            </h1>
+            <p class="text-slate-500 text-[10px] uppercase tracking-widest">Supports All QR & Barcodes</p>
         </div>
+        
+        <div class="bg-[#1e293b] p-4 rounded-2xl border border-slate-700 shadow-xl">
+            <label class="block text-blue-400 text-[10px] font-bold mb-2 uppercase tracking-widest">1. Inspector Name</label>
+            <input type="text" id="inspector" placeholder="ระบุชื่อผู้ตรวจสอบ..." 
+                   class="w-full bg-[#0f172a] border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all">
+        </div>
+
+        <div id="reader" class="w-full aspect-square border-2 border-slate-800 shadow-2xl"></div>
+
+        <div class="bg-[#1e293b] p-6 rounded-3xl border border-slate-700 text-center shadow-inner">
+            <label class="block text-blue-400 text-[10px] font-bold mb-2 uppercase tracking-widest">2. Scanned Data</label>
+            <div id="result" class="text-2xl font-mono font-bold text-emerald-400 break-all min-h-[40px]">
+                ---
+            </div>
+        </div>
+
+        <p class="text-slate-500 text-[10px] text-center italic">
+            * หากสแกน Barcode ไม่ติด ให้ลองถือกล้องในแนวนอน หรือขยับเข้า-ออกช้าๆ
+        </p>
     </div>
 
     <script>
-        const webAppUrl = "ใส่_URL_ของ_GOOGLE_APPS_SCRIPT_ตรงนี้"; // 🚩 เปลี่ยนตรงนี้!
+        // 🚩 อย่าลืมเปลี่ยน URL ของ Google Apps Script ตรงนี้!
+        const webAppUrl = "ใส่_URL_ของ_GOOGLE_APPS_SCRIPT_ตรงนี้"; 
+        
         const html5QrCode = new Html5Qrcode("reader");
 
-// 🚩 แก้ไขบรรทัดที่ตั้งค่า formats เพื่อรองรับ Barcode ทุกชนิด
-const config = { 
-    fps: 20, 
-    qrbox: { width: 280, height: 150 }, // ปรับทรงกล่องให้ยาวขึ้นเหมาะกับ Barcode
-    aspectRatio: 1.0,
-    // เพิ่มบรรทัดนี้เพื่อบอกว่า "เอาทุก Format"
-    formatsToSupport: [ 
-        Html5QrcodeSupportedFormats.QR_CODE,
-        Html5QrcodeSupportedFormats.UPC_A,
-        Html5QrcodeSupportedFormats.UPC_E,
-        Html5QrcodeSupportedFormats.EAN_13,
-        Html5QrcodeSupportedFormats.EAN_8,
-        Html5QrcodeSupportedFormats.CODE_39,
-        Html5QrcodeSupportedFormats.CODE_128,
-        Html5QrcodeSupportedFormats.ITF
-    ]
-};
+        // --- Configuration v3.2 (Optimized for Barcodes) ---
+        const config = { 
+            fps: 25, // เพิ่มความถี่ในการจับภาพ
+            qrbox: { width: 320, height: 180 }, // ขยายกล่องให้กว้างขึ้นมากพิเศษสำหรับ Barcode
+            aspectRatio: 1.0,
+            experimentalFeatures: {
+                useBarCodeDetectorIfSupported: true // ใช้ระบบตรวจจับบาร์โค้ดจาก Hardware (ถ้ามือถือรองรับ)
+            },
+            // ระบุ Format ทั้งหมดที่ต้องการให้สแกนได้
+            formatsToSupport: [ 
+                Html5QrcodeSupportedFormats.QR_CODE,
+                Html5QrcodeSupportedFormats.CODE_128, // บาร์โค้ดพัสดุ/สินทรัพย์ (ยอดนิยม)
+                Html5QrcodeSupportedFormats.EAN_13,   // บาร์โค้ดสินค้าทั่วไป
+                Html5QrcodeSupportedFormats.CODE_39,
+                Html5QrcodeSupportedFormats.UPC_A,
+                Html5QrcodeSupportedFormats.ITF
+            ]
+        };
 
+        // เริ่มต้นการสแกนอัตโนมัติ
         html5QrCode.start({ facingMode: "environment" }, config, (decodedText) => {
-            document.getElementById('result').innerText = "Sending...";
+            document.getElementById('result').innerText = "Sending Data...";
             
-            // ส่งข้อมูลไป Google Sheets
+            // ส่งข้อมูลไปที่ Google Sheets (Backend)
             fetch(webAppUrl, {
                 method: 'POST',
-                mode: 'no-cors', // ข้าม CORS Policy
+                mode: 'no-cors',
+                cache: 'no-cache',
                 body: JSON.stringify({
                     inspector: document.getElementById('inspector').value || "N/A",
                     qrData: decodedText
                 })
             }).then(() => {
                 document.getElementById('result').innerText = decodedText;
-                alert("สแกนสำเร็จ: " + decodedText);
-            }).catch(err => alert("Error: " + err));
+                // สั่นแจ้งเตือน (เฉพาะมือถือที่รองรับ)
+                if (navigator.vibrate) navigator.vibrate(100);
+            }).catch(err => {
+                console.error("Fetch Error:", err);
+                alert("บันทึกผิดพลาด แต่อ่านค่าได้: " + decodedText);
+            });
+        }).catch(err => {
+            console.error("Camera Error:", err);
+            document.getElementById('result').innerText = "Camera Error";
         });
     </script>
 </body>
